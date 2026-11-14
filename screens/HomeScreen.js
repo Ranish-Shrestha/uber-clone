@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as Location from 'expo-location';
 import { GOOGLE_MAPS_APIKEY } from '@env';
-import { selectOrigin, setDestination, setOrigin } from '../slices/navSlice';
+import { selectOrigin, setDestination, setOrigin, setUserOrigin } from '../slices/navSlice';
 import NavScreen from './NavScreen';
 import EatsScreen from './EatsScreen';
 import WhereToScreen from './WhereToScreen';
@@ -61,16 +61,24 @@ const HomeScreen = () => {
             let position = await Location.getCurrentPositionAsync({});
             setLocation(position);
 
-            const latitude = 43.7052033// position.coords.latitude; 
-            const longitude = -79.27641539999999//position.coords.longitude; 
+            const latitude = position.coords.latitude; 
+            const longitude = position.coords.longitude; 
 
             fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_APIKEY}`)
             .then(response => response.json())
             .then(data => {
-                dispatch(setOrigin({
-                    location: data.results[0].geometry.location,
-                    description: data.results[0].formatted_address
-                }))
+              dispatch(
+                setOrigin({
+                  location: data.results[0].geometry.location,
+                  description: data.results[0].formatted_address
+                })
+              )
+              dispatch(
+                  setUserOrigin({
+                  location: data.results[0].geometry.location,
+                  description: data.results[0].formatted_address
+                })
+              )
             })
             .catch(error => console.log(error));
 
